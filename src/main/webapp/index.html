@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Earthquakes</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <!-- Maps API KEY AIzaSyDnUM4ZqWUX1-sF1tuiGtMb84u3UxZTIv8 -->
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDnUM4ZqWUX1-sF1tuiGtMb84u3UxZTIv8"></script>
+
+        <!--jQuery-->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+        <!--Vue.js-->
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+        <style>
+
+            #map
+            {
+                height: 500px;
+                width: 500px;
+            }
+
+        </style>
+    </head>
+
+    <body>
+        <h1>Hello Earthquakes!</h1>
+
+        <div id="map"></div>
+
+        <table id="quakeList">
+            <tr>
+                <th>ID</th>
+                <th>Magnitude</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Place</th>
+                <th>Time</th>
+            </tr>
+
+            <tr v-for="quake in quakes" v-on:click="setCoordinates(quake)">
+                <td>{{quake.id}}</td>
+                <td>{{quake.magnitude}}</td>
+                <td>{{quake.latitude}}</td>
+                <td>{{quake.longitude}}</td>
+                <td>{{quake.place}}</td>
+                <td>{{quake.time}}</td>
+            </tr>
+        </table>
+
+        <script>
+
+            var app = {
+                el: "#quakeList",
+
+                data: {
+                    quakes: []
+                },
+
+                watch: {
+                    quakes() {
+                        this.setCoordinates(this.quakes[0]);
+                    }
+                },
+
+                methods: {
+                    showCoordinates: function (quakes) {
+                        console.log(quakes.latitude + ", " + quakes.longitude);
+                    },
+                    setCoordinates: function (quakes) {
+                        var coordinates = {
+                            lat : quakes.latitude,
+                            lng : quakes.longitude
+                        }
+                        
+                        var map_spec = {
+                            center: coordinates,
+                            mapTypeId: 'terrain',
+                            zoom: 7
+                        };
+                        
+                        var map = new google.maps.Map(document.getElementById('map'), map_spec);
+                        
+                        var marker_spec = {
+                            position: coordinates,
+                            map: map
+                        };
+
+                        new google.maps.Marker(marker_spec);
+                    }
+                }
+            };
+
+            var vue = new Vue(app);
+
+            $.get("servlet", function (response) {
+                vue.quakes = response;
+            });
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Maps</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <!-- Maps API KEY AIzaSyDnUM4ZqWUX1-sF1tuiGtMb84u3UxZTIv8 -->
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDnUM4ZqWUX1-sF1tuiGtMb84u3UxZTIv8"></script>
+        <!--jQuery-->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        
+        <style>
+            
+            #map{
+                height: 500px;
+                width: 500px;
+            }
+            
+        </style>
+        
+    </head>
+    <body>
+        <div id="map"></div>
+        
+    <script>
+        var coordinates = {
+            lat : 65.006,
+            lng : -147.359
+        };
+        
+        var map_spec = {
+            center : coordinates,
+            mapTypeId : 'terrain',
+            zoom : 7
+        };
+        
+        var map = new google.maps.Map(document.getElementById('map'), map_spec);
+        
+        var marker_spec = {
+            position : coordinates,
+            map : map
+        };
+        
+        var marker = new google.maps.Marker(marker_spec);
+    </script>
+    
+    </body>
+    
+    
+</html>
