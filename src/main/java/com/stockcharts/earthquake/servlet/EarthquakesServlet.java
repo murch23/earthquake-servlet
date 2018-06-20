@@ -86,13 +86,12 @@ public class EarthquakesServlet extends HttpServlet {
         String sort = request.getParameter("sort");
         
         if(sort == null){
-            sort = "magnitude";
+            sort = "";
         }
         
+        logger.debug("Recieved the sort parameter");
+        
         switch (sort) {
-            case "magnitude":
-                Collections.sort(quakes, Earthquake.MAGNITUDE);
-                break;
             case "latitude":
                 Collections.sort(quakes, Earthquake.LATITUDE);
                 break;
