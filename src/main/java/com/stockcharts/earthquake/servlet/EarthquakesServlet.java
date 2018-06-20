@@ -77,7 +77,7 @@ public class EarthquakesServlet extends HttpServlet {
         try{
             quakes = EarthquakeDAO.getEarthquakeList();
         } catch (SQLException e) {
-            
+            logger.fatal("Error trying to add earthquakes to list from database", e);
         }
         
         
