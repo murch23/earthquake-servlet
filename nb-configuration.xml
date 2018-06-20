@@ -21,6 +21,7 @@ Any value defined here will override the pom.xml file value but is only applicab
         <word>API</word>
         <word>DailyRollingFileAppender</word>
         <word>dd</word>
+        <word>DefaultLogAppender</word>
         <word>DefaultLogFile</word>
         <word>EEE</word>
         <word>HH</word>

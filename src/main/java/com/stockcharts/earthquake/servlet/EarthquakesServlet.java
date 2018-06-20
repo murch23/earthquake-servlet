@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.apache.log4j.Logger;
 import javax.servlet.ServletConfig;
@@ -18,7 +19,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
-import org.json.JSONObject;
+//import org.json.JSONObject;
 
 public class EarthquakesServlet extends HttpServlet {
 
@@ -73,19 +74,39 @@ public class EarthquakesServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
         List<Earthquake> quakes = new ArrayList<>();
+        
         try{
             quakes = EarthquakeDAO.getEarthquakeList();
         } catch (SQLException e) {
-            logger.fatal("Error trying to add earthquakes to list from database", e);
+            logger.fatal("Error trying to add earthquakes to list from database in DoGet()", e);
         }
         
+        String sort = request.getParameter("sort");
         
-        JSONArray ja = new JSONArray();
-        
-        for (Earthquake quake : quakes) {
-            ja.put(new JSONObject(quake));
+        if(sort == null){
+            sort = "magnitude";
         }
+        
+        switch (sort) {
+            case "magnitude":
+                Collections.sort(quakes, Earthquake.MAGNITUDE);
+                break;
+            case "latitude":
+                Collections.sort(quakes, Earthquake.LATITUDE);
+                break;
+            case "longitude":
+                Collections.sort(quakes, Earthquake.LONGITUDE);
+                break;
+            case "time":
+                Collections.sort(quakes, Earthquake.TIME);
+            default:
+                //do nothing
+                break;
+        }
+        
+        JSONArray ja = new JSONArray(quakes);
         
         try (PrintWriter out = response.getWriter()) {
             
