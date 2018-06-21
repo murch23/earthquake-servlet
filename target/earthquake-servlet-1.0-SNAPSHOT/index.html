@@ -21,33 +21,44 @@
                 height: 500px;
                 width: 500px;
             }
-            
+
             #quakeList
             {
                 margin: auto;
                 overflow: auto;
             }
-            
+
             #quakeTable
             {
                 margin: auto;
             }
-            
+
             #quakeTable td
             {
                 text-align: center;
                 vertical-align: middle;
+            }
+            
+            #quakeTable tr:hover
+            {
+                background-color: rgb(173,216,230);
+            }
+            
+            #quakeTable, th, td
+            {
+                border: 1px solid black;
             }
 
         </style>
     </head>
 
     <body>
-        <h1>Hello Earthquakes!</h1>
-
         <div id="map"></div>
-        
+
         <div id="quakeList">
+            <button v-on:click="removeMarker">Remove Marker</button>
+            <button v-on:click="showAllMarkersBelowEquator">Show Below Equator</button>
+            <button v-on:click="showAllMarkersAboveEquator">Show Above Equator</button>
             <table id="quakeTable">
                 <tr>
                     <th></th>
@@ -66,7 +77,7 @@
                     <th>Time</th>
                 </tr>
 
-                <tr v-for="quake in quakes" v-on:click="setCoordinates(quake)">
+                <tr v-for="quake in quakes" v-on:click="renderMap(quake)">
                     <td>{{quake.id}}</td>
                     <td>{{quake.magnitude}}</td>
                     <td>{{quake.latitude}}</td>
@@ -76,7 +87,7 @@
                 </tr>
             </table>
         </div>
-        
+
 
         <script>
 
@@ -84,12 +95,15 @@
                 el: "#quakeList",
 
                 data: {
-                    quakes: []
+                    quakes: [],
+                    map: null,
+                    marker: null
                 },
 
                 watch: {
                     quakes() {
-                        this.setCoordinates(this.quakes[0]);
+                        this.renderMap(this.quakes[0]);
+                        this.renderMarker(this.quakes[0]);
                     }
                 },
 
@@ -97,35 +111,76 @@
                     showCoordinates: function (quakes) {
                         console.log(quakes.latitude + ", " + quakes.longitude);
                     },
-                    
-                    setCoordinates: function (quakes) {
+
+                    renderMap: function (quake) {
                         var coordinates = {
-                            lat : quakes.latitude,
-                            lng : quakes.longitude
+                            lat: quake.latitude,
+                            lng: quake.longitude
                         }
-                        
+
                         var map_spec = {
                             center: coordinates,
                             mapTypeId: 'terrain',
                             zoom: 7
                         };
-                        
-                        var map = new google.maps.Map(document.getElementById('map'), map_spec);
-                        
+
+                        app.map = new google.maps.Map(document.getElementById('map'), map_spec);
+                        this.renderMarker(quake);
+                    },
+
+                    renderMarker: function (quake) {
+                        var coordinates = {
+                            lat: quake.latitude,
+                            lng: quake.longitude
+                        };
                         var marker_spec = {
                             position: coordinates,
-                            map: map
+                            map: this.map
                         };
 
-                        new google.maps.Marker(marker_spec);
+                        app.marker = new google.maps.Marker(marker_spec);
+                    },
+
+                    showAllMarkersBelowEquator: function () {
+                        var quakesBelowEquator = [];
+                        
+                        for (var i = 0; i < this.quakes.length; i++) {
+                            var latitude = this.quakes[i].latitude;
+                            if (latitude < 0) {
+                                quakesBelowEquator.push(this.quakes[i]);
+                            }
+                        }
+                        
+                        for (var i = 0; i < quakesBelowEquator.length; i++) {
+                             this.renderMarker(quakesBelowEquator[i]);
+                        }
                     },
                     
-                    sortByKey : function(sortKey){
-                        console.log("sorting by " + sortKey);
-                        $.get("servlet" + "?sort=" + sortKey, function(response){
+                    showAllMarkersAboveEquator: function() {
+                        var quakesAboveEquator = [];
+                        
+                        for (var i = 0; i < this.quakes.length; i++) {
+                            var latitude = this.quakes[i].latitude;
+                            if (latitude > 0) {
+                                quakesAboveEquator.push(this.quakes[i]);
+                            }
+                        }
+                        
+                        for (var i = 0; i < quakesAboveEquator.length; i++) {
+                            this.renderMarker(quakesAboveEquator[i]);
+                        }
+                    },
+
+                    sortByKey: function (sortKey) {
+                        console.log("sorting by " + sortKey + "...");
+                        $.get("servlet" + "?sort=" + sortKey, function (response) {
                             app.quakes = response;
                         });
-                        
+                        console.log("...finished sorting");
+                    },
+
+                    removeMarker: function () {
+                        this.marker.setMap(null);
                     }
                 }
             });
