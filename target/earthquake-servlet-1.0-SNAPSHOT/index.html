@@ -17,8 +17,26 @@
 
             #map
             {
+                margin: auto;
                 height: 500px;
                 width: 500px;
+            }
+            
+            #quakeList
+            {
+                margin: auto;
+                overflow: auto;
+            }
+            
+            #quakeTable
+            {
+                margin: auto;
+            }
+            
+            #quakeTable td
+            {
+                text-align: center;
+                vertical-align: middle;
             }
 
         </style>
@@ -28,30 +46,41 @@
         <h1>Hello Earthquakes!</h1>
 
         <div id="map"></div>
+        
+        <div id="quakeList">
+            <table id="quakeTable">
+                <tr>
+                    <th></th>
+                    <th><button v-on:click="sortByKey('magnitude')">Magnitude</button></th>
+                    <th><button v-on:click="sortByKey('latitude')">Latitude</button></th>
+                    <th><button v-on:click="sortByKey('longitude')">Longitude</button></th>
+                    <th></th>
+                    <th><button v-on:click="sortByKey('time')">Time</button></th>
+                </tr>
+                <tr>
+                    <th>ID</th>
+                    <th>Magnitude</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Place</th>
+                    <th>Time</th>
+                </tr>
 
-        <table id="quakeList">
-            <tr>
-                <th>ID</th>
-                <th>Magnitude</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-                <th>Place</th>
-                <th>Time</th>
-            </tr>
-
-            <tr v-for="quake in quakes" v-on:click="setCoordinates(quake)">
-                <td>{{quake.id}}</td>
-                <td>{{quake.magnitude}}</td>
-                <td>{{quake.latitude}}</td>
-                <td>{{quake.longitude}}</td>
-                <td>{{quake.place}}</td>
-                <td>{{quake.time}}</td>
-            </tr>
-        </table>
+                <tr v-for="quake in quakes" v-on:click="setCoordinates(quake)">
+                    <td>{{quake.id}}</td>
+                    <td>{{quake.magnitude}}</td>
+                    <td>{{quake.latitude}}</td>
+                    <td>{{quake.longitude}}</td>
+                    <td>{{quake.place}}</td>
+                    <td>{{quake.time}}</td>
+                </tr>
+            </table>
+        </div>
+        
 
         <script>
 
-            var app = {
+            var app = new Vue({
                 el: "#quakeList",
 
                 data: {
@@ -68,6 +97,7 @@
                     showCoordinates: function (quakes) {
                         console.log(quakes.latitude + ", " + quakes.longitude);
                     },
+                    
                     setCoordinates: function (quakes) {
                         var coordinates = {
                             lat : quakes.latitude,
@@ -88,14 +118,20 @@
                         };
 
                         new google.maps.Marker(marker_spec);
+                    },
+                    
+                    sortByKey : function(sortKey){
+                        console.log("sorting by " + sortKey);
+                        $.get("servlet" + "?sort=" + sortKey, function(response){
+                            app.quakes = response;
+                        });
+                        
                     }
                 }
-            };
-
-            var vue = new Vue(app);
+            });
 
             $.get("servlet", function (response) {
-                vue.quakes = response;
+                app.quakes = response;
             });
 
         </script>
