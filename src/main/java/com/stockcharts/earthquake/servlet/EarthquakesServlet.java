@@ -5,6 +5,7 @@
  */
 package com.stockcharts.earthquake.servlet;
 
+import com.google.common.cache.Cache;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
@@ -25,8 +26,11 @@ public class EarthquakesServlet extends HttpServlet {
 
     private static final String DB_DRIVER_CLASS = "org.mariadb.jdbc.Driver";
     public static final String DATABASE_URL = "jdbc:mariadb:aurora://scc-intern-db.couiu6erjuou.us-east-1.rds.amazonaws.com:3306/InternDB?user=intern&password=stockcharts2018&trustServerCertificate=true&connectTimeout=5000";
+    public static final String EARTHQUAKES_URL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
     
     private final Logger logger = Logger.getLogger(EarthquakesServlet.class.getName());
+    
+    //private Cache<String, List<Earthquake>> earthquakeCache;
     
     @Override
     public void init(ServletConfig config)throws ServletException {
@@ -78,9 +82,9 @@ public class EarthquakesServlet extends HttpServlet {
         List<Earthquake> quakes = new ArrayList<>();
         
         try{
-            quakes = EarthquakeDAO.getEarthquakeList();
-        } catch (SQLException e) {
-            logger.fatal("Error trying to add earthquakes to list from database in DoGet()", e);
+            quakes = EarthquakeDAO.getEarthquakesFromFeed();
+        } catch (IOException e) {
+            logger.error("IOException reading from Earthquakes feed", e);
         }
         
         String sort = request.getParameter("sort");

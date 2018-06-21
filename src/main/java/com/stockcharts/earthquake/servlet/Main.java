@@ -6,55 +6,54 @@
 package com.stockcharts.earthquake.servlet;
 import java.sql.*;
 import java.util.*;
+import com.stockcharts.commons.net.*;
+import java.io.IOException;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  *
  * @author murch23
  */
 public class Main {
-    private static final String DB_DRIVER_CLASS = "org.mariadb.jdbc.Driver";
-    public static final String DATABASE_URL = "jdbc:mariadb:aurora://scc-intern-db.couiu6erjuou.us-east-1.rds.amazonaws.com:3306/InternDB?user=intern&password=stockcharts2018&trustServerCertificate=true&connectTimeout=5000";
+    private static final String EARTHQUAKES_URL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
     
     
-    public static void main(String[] args){
-        try {
-            //loads the driver class
-            Class.forName(DB_DRIVER_CLASS);
-        } catch (ClassNotFoundException e) {
-            System.out.println("Driver class not found. " + e);
-            return;
-        }
+    
+    public static void main(String[] args) throws IOException{
         
-        List<Earthquake> earthquakes = getEarthquakeList();
+       List<Earthquake> quakes = EarthquakeDAO.getEarthquakesFromFeed();
+       
+       for (Earthquake quake : quakes) {
+           System.out.println(quake.toString());
+       }
         
-        for (Earthquake quake : earthquakes) {
-            System.out.println(quake);
-        }
     }
     
-    private static List<Earthquake> getEarthquakeList(){
-        List<Earthquake> earthquakeList = new ArrayList<>();
+    private static Earthquake getEarthquakeFromJSONObject(JSONObject jo) {
         
-        String query = "SELECT * FROM InternDB.Earthquakes";
-        try (Connection conn = DriverManager.getConnection(DATABASE_URL);
-                PreparedStatement stmt = conn.prepareStatement(query)) {
+        JSONArray coordinates = jo.getJSONObject("geometry").getJSONArray("coordinates");
+        JSONObject properties = jo.getJSONObject("properties");
+        
+        
+        Earthquake quake = new Earthquake()
+                .withId(jo.getString("id"))
+                .withLatitude(coordinates.getFloat(0))
+                .withLongitude(coordinates.getFloat(1))
+                .withMagnitude(properties.getFloat("mag"))
+                .withPlace(properties.getString("place"))
+                .withTime(properties.getLong("time"));
+        
+        return quake;
+    }
+    
+    private static List<Earthquake> getEarthquakeFromJSONArray(JSONArray ja) {
+        List<Earthquake> quakes = new ArrayList<>();
+        
+        for (int i = 0; i < ja.length(); i++) {
             
-            ResultSet rs = stmt.executeQuery();
-            
-            while (rs.next()) {
-                earthquakeList.add(new Earthquake()
-                        .withId(rs.getString("id"))
-                        .withLatitude(rs.getFloat("latitude"))
-                        .withLongitude(rs.getFloat("longitude"))
-                        .withMagnitude(rs.getFloat("magnitude"))
-                        .withPlace(rs.getString("place"))
-                        .withTime(rs.getLong("time")));
-            }
-            
-        } catch (SQLException e) {
-            System.out.println("Error querying database. " + e);
         }
         
-        return earthquakeList;
+        return quakes;
     }
 }
