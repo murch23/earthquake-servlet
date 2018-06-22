@@ -46,7 +46,7 @@
             
             #quakeTable, th, td
             {
-                border: 1px solid black;
+                border: 1px solid rgb(123,123,123);
             }
 
         </style>
@@ -127,7 +127,7 @@
                         app.map = new google.maps.Map(document.getElementById('map'), map_spec);
                         this.renderMarker(quake);
                     },
-
+                    
                     renderMarker: function (quake) {
                         var coordinates = {
                             lat: quake.latitude,
@@ -154,6 +154,8 @@
                         for (var i = 0; i < quakesBelowEquator.length; i++) {
                              this.renderMarker(quakesBelowEquator[i]);
                         }
+                        
+                        app.map.setZoom(0.5);
                     },
                     
                     showAllMarkersAboveEquator: function() {
@@ -169,6 +171,8 @@
                         for (var i = 0; i < quakesAboveEquator.length; i++) {
                             this.renderMarker(quakesAboveEquator[i]);
                         }
+                        
+                        app.map.setZoom(0.5);
                     },
 
                     sortByKey: function (sortKey) {
